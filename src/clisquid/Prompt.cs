@@ -3,6 +3,7 @@ namespace CliSquid
     using System;
     using System.Collections.Generic;
     using System.Drawing;
+    using System.IO;
     using System.Linq;
     using System.Text;
     using Pastel;
@@ -22,6 +23,15 @@ namespace CliSquid
         internal const string CHECK_ACTIVE = "\u25FB"; // ◻
         internal const string CHECK_INACTIVE = "\u25FB"; // ◻
         internal const string CHECK_SELECTED = "\u25FC"; // ◼
+
+        private static TextWriter output = Console.Out;
+
+        public static void Init()
+        {
+            Console.Clear();
+            output = Console.Out;
+            Console.SetOut(new PrefixWriter());
+        }
 
         public static IUserInputPrompt<T> FromUserInput<T>() => new Prompt<T>();
 
@@ -54,15 +64,15 @@ namespace CliSquid
         internal static void WriteGutter(string gutter, bool newLine = false)
         {
             var suffix = newLine ? "\n" : "  ";
-            Console.Write("{0}{1}", gutter, suffix);
+            output.Write("{0}{1}", gutter, suffix);
         }
 
         internal static void WriteText(string text, bool newLine = true)
         {
             if (newLine)
-                Console.WriteLine(text);
+                output.WriteLine(text);
             else
-                Console.Write(text);
+                output.Write(text);
         }
 
         internal static string GetGutterPrompt(PromptStatus status)
