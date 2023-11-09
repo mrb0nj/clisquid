@@ -206,7 +206,7 @@ namespace CliSquid
             return this;
         }
 
-        public T Read()
+        public T Read(Func<string, T> converter)
         {
             Action<string, string, PromptStatus, string> render = (
                 string prompt,
@@ -327,16 +327,20 @@ namespace CliSquid
             reRender(_text, response, PromptStatus.Complete, string.Empty);
 
             Console.SetCursorPosition(0, pos.Top + 2);
+
             T output;
             try
             {
-                output = (T)Convert.ChangeType(response, typeof(T));
+                if (converter != null)
+                    output = converter(response);
+                else
+                    output = (T)Convert.ChangeType(response, typeof(T));
             }
             catch
             {
                 output = default(T);
             } // eeeugh
-            return output;
+            return output!;
         }
 
         public IList<T> SelectMany()
@@ -348,7 +352,7 @@ namespace CliSquid
                 string,
                 IList<PromptOption<T>>,
                 IList<PromptOption<T>>,
-                PromptOption<T>,
+                PromptOption<T>?,
                 PromptStatus
             > render = (
                 string prompt,
@@ -435,7 +439,7 @@ namespace CliSquid
                 string,
                 IList<PromptOption<T>>,
                 IList<PromptOption<T>>,
-                PromptOption<T>,
+                PromptOption<T>?,
                 PromptStatus
             > reRender = (
                 string prompt,

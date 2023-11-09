@@ -8,6 +8,6 @@ namespace CliSquid
         IUserInputPrompt<T> Placeholder(string placeholder);
         IUserInputPrompt<T> InitialValue(string initialValue);
         IUserInputPrompt<T> Validate(Func<string, Tuple<bool, string>> validator);
-        T Read();
+        T Read(Func<string, T> converter = null!);
     }
 }
