@@ -1,9 +1,11 @@
-namespace CliSquid
+namespace CliSquid.Prompts
 {
     using System;
     using System.Drawing;
     using System.Threading;
     using System.Threading.Tasks;
+    using CliSquid.Enums;
+    using CliSquid.Interfaces;
     using Pastel;
 
     public class SpinnerPrompt<T> : ISpinner<T>
@@ -11,6 +13,17 @@ namespace CliSquid
         private string _title = "";
         private string _status = "";
         private SpinnerType _spinnerType = SpinnerType.Dots;
+        private PromptOptions _promptOptions;
+
+        public SpinnerPrompt()
+        {
+            _promptOptions = new PromptOptions();
+        }
+
+        public SpinnerPrompt(PromptOptions promptOptions)
+        {
+            _promptOptions = promptOptions;
+        }
 
         public ISpinner<T> SetSpinnerType(SpinnerType spinnerType)
         {
@@ -35,13 +48,13 @@ namespace CliSquid
             while (!t.IsCompleted)
             {
                 Console.SetCursorPosition(0, pos.Top);
-                Prompt.WriteGutter(sp[c].Pastel(Color.DodgerBlue));
+                Prompt.WriteGutter(sp[c].Pastel(_promptOptions.ActiveColour));
                 Prompt.WriteText(_title);
                 Prompt.WriteGutter(Prompt.GetGutterBar(PromptStatus.Active));
                 Prompt.WriteText(
                     _status
                         .PadRight(Console.WindowWidth - _status.Length - Prompt.GUTTER_PAD_RIGHT)
-                        .Pastel(Color.DimGray)
+                        .Pastel(_promptOptions.MutedColour)
                 );
                 Prompt.WriteGutter(Prompt.GetGutterEnd(PromptStatus.Active));
                 Thread.Sleep(st);
@@ -57,7 +70,7 @@ namespace CliSquid
                 _title.PadRight(Console.WindowWidth - _title.Length - Prompt.GUTTER_PAD_RIGHT)
             );
             Prompt.WriteGutter(Prompt.GetGutterBar(PromptStatus.Complete));
-            Prompt.WriteText(resultText.Pastel(Color.DimGray));
+            Prompt.WriteText(resultText.Pastel(_promptOptions.MutedColour));
             Prompt.WriteGutter(Prompt.GetGutterBar(PromptStatus.Complete), newLine: true);
 
             Console.CursorVisible = true;

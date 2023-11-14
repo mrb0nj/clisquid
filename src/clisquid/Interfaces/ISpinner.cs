@@ -1,6 +1,7 @@
-namespace CliSquid
+namespace CliSquid.Interfaces
 {
     using System;
+    using CliSquid.Enums;
 
     public interface ISpinner<T>
     {

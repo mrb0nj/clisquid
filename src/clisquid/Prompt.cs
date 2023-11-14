@@ -4,6 +4,9 @@ namespace CliSquid
     using System.Collections.Generic;
     using System.Drawing;
     using System.IO;
+    using CliSquid.Enums;
+    using CliSquid.Interfaces;
+    using CliSquid.Prompts;
     using Pastel;
 
     public static class Prompt
@@ -23,31 +26,45 @@ namespace CliSquid
         internal const string CHECK_SELECTED = "\u25FC"; // ◼
 
         private static TextWriter output = Console.Out;
+        private static PromptOptions promptOptions;
 
-        public static void Init()
+        public static void Configure()
         {
+            promptOptions = new PromptOptions();
             Console.Clear();
             output = Console.Out;
             Console.SetOut(new PrefixWriter());
         }
 
-        public static IUserInputPrompt<T> FromUserInput<T>() => new UserInputPrompt<T>();
+        public static void Configure(Action<PromptOptions> configure)
+        {
+            Prompt.Configure();
+            configure(promptOptions);
+        }
 
-        public static ISelectPrompt<T> FromList<T>() => new SelectPrompt<T>();
+        public static IUserInputPrompt<T> FromUserInput<T>() =>
+            new UserInputPrompt<T>(promptOptions);
 
-        public static ISpinner<T> Spinner<T>() => new SpinnerPrompt<T>();
+        public static ISelectPrompt<T> FromList<T>() => new SelectPrompt<T>(promptOptions);
+
+        public static ISpinner<T> Spinner<T>() => new SpinnerPrompt<T>(promptOptions);
 
         public static void Intro(string text)
         {
-            WriteGutter(GUTTER_BAR_START.Pastel(Color.DimGray));
-            WriteText(string.Format(" {0} ".Pastel(Color.Black).PastelBg(Color.DodgerBlue), text));
-            WriteGutter(GUTTER_BAR.Pastel(Color.DimGray), newLine: true);
+            WriteGutter(GUTTER_BAR_START.Pastel(promptOptions.MutedColour));
+            WriteText(
+                string.Format(
+                    " {0} ".Pastel(Color.Black).PastelBg(promptOptions.ActiveColour),
+                    text
+                )
+            );
+            WriteGutter(GUTTER_BAR.Pastel(promptOptions.MutedColour), newLine: true);
         }
 
         public static void Complete(string text)
         {
-            WriteGutter(GUTTER_BAR_END.Pastel(Color.DimGray));
-            WriteText(string.Format("{0}".Pastel(Color.GreenYellow), text));
+            WriteGutter(GUTTER_BAR_END.Pastel(promptOptions.MutedColour));
+            WriteText(string.Format("{0}".Pastel(promptOptions.CompleteColour), text));
             WriteText(string.Empty);
         }
 
@@ -81,16 +98,16 @@ namespace CliSquid
             switch (status)
             {
                 case PromptStatus.Active:
-                    r = Prompt.GUTTER_PROMPT.Pastel(Color.DodgerBlue);
+                    r = Prompt.GUTTER_PROMPT.Pastel(promptOptions.ActiveColour);
                     break;
                 case PromptStatus.Complete:
-                    r = Prompt.GUTTER_PROMPT_COMPLETE.Pastel(Color.GreenYellow);
+                    r = Prompt.GUTTER_PROMPT_COMPLETE.Pastel(promptOptions.CompleteColour);
                     break;
                 case PromptStatus.Warning:
-                    r = Prompt.GUTTER_PROMPT_WARNING.Pastel(Color.Goldenrod);
+                    r = Prompt.GUTTER_PROMPT_WARNING.Pastel(promptOptions.WarningColour);
                     break;
                 case PromptStatus.Error:
-                    r = Prompt.GUTTER_PROMPT_ERROR.Pastel(Color.Crimson);
+                    r = Prompt.GUTTER_PROMPT_ERROR.Pastel(promptOptions.ErrorColour);
                     break;
             }
 
@@ -103,16 +120,16 @@ namespace CliSquid
             switch (status)
             {
                 case PromptStatus.Active:
-                    r = Prompt.GUTTER_BAR.Pastel(Color.DodgerBlue);
+                    r = Prompt.GUTTER_BAR.Pastel(promptOptions.ActiveColour);
                     break;
                 case PromptStatus.Complete:
-                    r = Prompt.GUTTER_BAR.Pastel(Color.DimGray);
+                    r = Prompt.GUTTER_BAR.Pastel(promptOptions.MutedColour);
                     break;
                 case PromptStatus.Warning:
-                    r = Prompt.GUTTER_BAR.Pastel(Color.Goldenrod);
+                    r = Prompt.GUTTER_BAR.Pastel(promptOptions.WarningColour);
                     break;
                 case PromptStatus.Error:
-                    r = Prompt.GUTTER_BAR.Pastel(Color.Crimson);
+                    r = Prompt.GUTTER_BAR.Pastel(promptOptions.ErrorColour);
                     break;
             }
 
@@ -127,16 +144,16 @@ namespace CliSquid
             switch (status)
             {
                 case PromptStatus.Active:
-                    r = note.Pastel(Color.DodgerBlue);
+                    r = note.Pastel(promptOptions.ActiveColour);
                     break;
                 case PromptStatus.Complete:
-                    r = note.Pastel(Color.DimGray);
+                    r = note.Pastel(promptOptions.MutedColour);
                     break;
                 case PromptStatus.Warning:
-                    r = note.Pastel(Color.Goldenrod);
+                    r = note.Pastel(promptOptions.WarningColour);
                     break;
                 case PromptStatus.Error:
-                    r = note.Pastel(Color.Crimson);
+                    r = note.Pastel(promptOptions.ErrorColour);
                     break;
             }
 
@@ -149,16 +166,16 @@ namespace CliSquid
             switch (status)
             {
                 case PromptStatus.Active:
-                    r = Prompt.GUTTER_BAR_END.Pastel(Color.DodgerBlue);
+                    r = Prompt.GUTTER_BAR_END.Pastel(promptOptions.ActiveColour);
                     break;
                 case PromptStatus.Complete:
-                    r = Prompt.GUTTER_BAR.Pastel(Color.DimGray);
+                    r = Prompt.GUTTER_BAR.Pastel(promptOptions.MutedColour);
                     break;
                 case PromptStatus.Warning:
-                    r = Prompt.GUTTER_BAR_END.Pastel(Color.Goldenrod);
+                    r = Prompt.GUTTER_BAR_END.Pastel(promptOptions.WarningColour);
                     break;
                 case PromptStatus.Error:
-                    r = Prompt.GUTTER_BAR_END.Pastel(Color.Crimson);
+                    r = Prompt.GUTTER_BAR_END.Pastel(promptOptions.ErrorColour);
                     break;
             }
 

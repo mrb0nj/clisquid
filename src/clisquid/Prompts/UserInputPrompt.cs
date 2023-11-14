@@ -1,8 +1,10 @@
-namespace CliSquid
+namespace CliSquid.Prompts
 {
     using System;
     using System.Drawing;
     using System.Text;
+    using CliSquid.Enums;
+    using CliSquid.Interfaces;
     using Pastel;
 
     public class UserInputPrompt<T> : IUserInputPrompt<T>
@@ -10,8 +12,17 @@ namespace CliSquid
         private string _title = "";
         private string _placeholder = "";
         private Func<string, Tuple<bool, string>>? _validator;
+        private PromptOptions _promptOptions;
 
-        public UserInputPrompt() { }
+        public UserInputPrompt()
+        {
+            _promptOptions = new PromptOptions();
+        }
+
+        public UserInputPrompt(PromptOptions promptOptions)
+        {
+            _promptOptions = promptOptions;
+        }
 
         public IUserInputPrompt<T> InitialValue(string initialValue)
         {
@@ -34,12 +45,14 @@ namespace CliSquid
             ) =>
             {
                 Prompt.WriteGutter(Prompt.GetGutterPrompt(status));
-                Prompt.WriteText(prompt.Pastel(Color.WhiteSmoke));
+                Prompt.WriteText(prompt.Pastel(_promptOptions.TextColour));
                 Prompt.WriteGutter(Prompt.GetGutterBar(status));
 
                 Prompt.WriteText(
                     response.Pastel(
-                        status == PromptStatus.Complete ? Color.DimGray : Color.WhiteSmoke
+                        status == PromptStatus.Complete
+                            ? _promptOptions.MutedColour
+                            : _promptOptions.TextColour
                     )
                 );
 
@@ -64,7 +77,12 @@ namespace CliSquid
                 render(prompt, response, status, warning);
             };
 
-            render(_title, _placeholder.Pastel(Color.DimGray), PromptStatus.Active, string.Empty);
+            render(
+                _title,
+                _placeholder.Pastel(_promptOptions.MutedColour),
+                PromptStatus.Active,
+                string.Empty
+            );
 
             Console.Out.Flush();
             var pos = CursorPosition.GetCursorPosition();
@@ -129,7 +147,7 @@ namespace CliSquid
                     valid = Tuple.Create(_validator == null, string.Empty);
 
                 var r = string.IsNullOrWhiteSpace(newInput)
-                    ? _placeholder.Pastel(Color.DimGray)
+                    ? _placeholder.Pastel(_promptOptions.MutedColour)
                     : newInput;
                 reRender(
                     _title,

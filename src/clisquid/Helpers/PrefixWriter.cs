@@ -4,6 +4,7 @@ namespace CliSquid
     using System.IO;
     using System.Text;
     using System.Threading.Tasks;
+    using CliSquid.Enums;
 
     internal class PrefixWriter : TextWriter
     {

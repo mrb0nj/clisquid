@@ -1,4 +1,4 @@
-namespace CliSquid
+namespace CliSquid.Enums
 {
     public enum SpinnerType
     {

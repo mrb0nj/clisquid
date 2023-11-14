@@ -1,4 +1,4 @@
-namespace CliSquid
+namespace CliSquid.Interfaces
 {
     using System.Collections.Generic;
 
