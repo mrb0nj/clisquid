@@ -1,7 +1,6 @@
 namespace CliSquid.Prompts
 {
     using System;
-    using System.Drawing;
     using System.Text;
     using CliSquid.Enums;
     using CliSquid.Interfaces;
@@ -12,14 +11,14 @@ namespace CliSquid.Prompts
         private string _title = "";
         private string _placeholder = "";
         private Func<string, Tuple<bool, string>>? _validator;
-        private PromptOptions _promptOptions;
+        private Configuration _promptOptions;
 
         public UserInputPrompt()
         {
-            _promptOptions = new PromptOptions();
+            _promptOptions = new Configuration();
         }
 
-        public UserInputPrompt(PromptOptions promptOptions)
+        public UserInputPrompt(Configuration promptOptions)
         {
             _promptOptions = promptOptions;
         }
@@ -45,14 +44,14 @@ namespace CliSquid.Prompts
             ) =>
             {
                 Prompt.WriteGutter(Prompt.GetGutterPrompt(status));
-                Prompt.WriteText(prompt.Pastel(_promptOptions.TextColour));
+                Prompt.WriteText(prompt.Pastel(_promptOptions.Theme.UserInputForeground));
                 Prompt.WriteGutter(Prompt.GetGutterBar(status));
 
                 Prompt.WriteText(
                     response.Pastel(
                         status == PromptStatus.Complete
-                            ? _promptOptions.MutedColour
-                            : _promptOptions.TextColour
+                            ? _promptOptions.Theme.UserInputResultForeground
+                            : _promptOptions.Theme.UserInputActiveForeground
                     )
                 );
 
@@ -79,7 +78,7 @@ namespace CliSquid.Prompts
 
             render(
                 _title,
-                _placeholder.Pastel(_promptOptions.MutedColour),
+                _placeholder.Pastel(_promptOptions.Theme.UserInputPlaceholderForeground),
                 PromptStatus.Active,
                 string.Empty
             );
@@ -147,7 +146,7 @@ namespace CliSquid.Prompts
                     valid = Tuple.Create(_validator == null, string.Empty);
 
                 var r = string.IsNullOrWhiteSpace(newInput)
-                    ? _placeholder.Pastel(_promptOptions.MutedColour)
+                    ? _placeholder.Pastel(_promptOptions.Theme.UserInputPlaceholderForeground)
                     : newInput;
                 reRender(
                     _title,

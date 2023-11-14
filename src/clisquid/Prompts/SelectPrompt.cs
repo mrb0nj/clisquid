@@ -13,14 +13,14 @@ namespace CliSquid.Prompts
         private IList<PromptOption<T>>? _options;
         private bool _optionsInline;
         private int _limit;
-        private PromptOptions _promptOptions;
+        private Configuration _promptOptions;
 
         public SelectPrompt()
         {
-            _promptOptions = new PromptOptions();
+            _promptOptions = new Configuration();
         }
 
-        public SelectPrompt(PromptOptions promptOptions)
+        public SelectPrompt(Configuration promptOptions)
         {
             _promptOptions = promptOptions;
         }
@@ -64,7 +64,7 @@ namespace CliSquid.Prompts
             {
                 Console.CursorVisible = false;
                 Prompt.WriteGutter(Prompt.GetGutterPrompt(status));
-                Prompt.WriteText(prompt.Pastel(_promptOptions.TextColour));
+                Prompt.WriteText(prompt.Pastel(_promptOptions.Theme.SelectForeground));
 
                 if (status == PromptStatus.Complete)
                 {
@@ -76,7 +76,7 @@ namespace CliSquid.Prompts
                     var display = selectedOptions.PadRight(
                         Console.WindowWidth - selectedOptions.Length - Prompt.GUTTER_PAD_RIGHT
                     );
-                    Prompt.WriteText(display.Pastel(_promptOptions.MutedColour));
+                    Prompt.WriteText(display.Pastel(_promptOptions.Theme.SelectResultForeground));
                     for (var i = 0; i < options.Count; i++)
                         Prompt.WriteText("".PadRight(Console.WindowWidth));
                     var pos = CursorPosition.GetCursorPosition();
@@ -94,25 +94,29 @@ namespace CliSquid.Prompts
                         var isActive = option == active;
                         var isSelected = selected.Contains(option);
                         var marker = isSelected
-                            ? Prompt.CHECK_SELECTED.Pastel(_promptOptions.ActiveColour)
+                            ? Prompt
+                                .CHECK_SELECTED
+                                .Pastel(_promptOptions.Theme.SelectOptionSelected)
                             : Prompt
                                 .CHECK_INACTIVE
                                 .Pastel(
                                     isActive
-                                        ? _promptOptions.ActiveColour
-                                        : _promptOptions.MutedColour
+                                        ? _promptOptions.Theme.SelectOptionActive
+                                        : _promptOptions.Theme.SelectOptionInactive
                                 );
 
                         var display = option
                             .Display
                             .Pastel(
-                                isActive ? _promptOptions.TextColour : _promptOptions.MutedColour
+                                isActive
+                                    ? _promptOptions.Theme.SelectOptionTextActive
+                                    : _promptOptions.Theme.SelectOptionTextInactive
                             );
                         if (!string.IsNullOrWhiteSpace(option.Hint) && isActive && !_optionsInline)
                             display = string.Format(
                                 "{0} {1}",
                                 display,
-                                option.Hint.Pastel(_promptOptions.MutedColour)
+                                option.Hint.Pastel(_promptOptions.Theme.SelectOptionHint)
                             );
 
                         if (!_optionsInline)
@@ -246,7 +250,7 @@ namespace CliSquid.Prompts
             {
                 Console.CursorVisible = false;
                 Prompt.WriteGutter(Prompt.GetGutterPrompt(status));
-                Prompt.WriteText(prompt.Pastel(_promptOptions.TextColour));
+                Prompt.WriteText(prompt.Pastel(_promptOptions.Theme.SelectForeground));
 
                 if (status == PromptStatus.Complete)
                 {
@@ -260,7 +264,9 @@ namespace CliSquid.Prompts
                                     - selected.Display.Length
                                     - Prompt.GUTTER_PAD_RIGHT
                             );
-                        Prompt.WriteText(display.Pastel(_promptOptions.MutedColour));
+                        Prompt.WriteText(
+                            display.Pastel(_promptOptions.Theme.SelectResultForeground)
+                        );
                     }
                 }
                 else
@@ -277,18 +283,22 @@ namespace CliSquid.Prompts
                         var marker = (
                             isActive ? Prompt.RADIO_ACTIVE : Prompt.RADIO_INACTIVE
                         ).Pastel(
-                            isActive ? _promptOptions.ActiveColour : _promptOptions.MutedColour
+                            isActive
+                                ? _promptOptions.Theme.SelectOptionActive
+                                : _promptOptions.Theme.SelectOptionInactive
                         );
                         var display = option
                             .Display
                             .Pastel(
-                                isActive ? _promptOptions.TextColour : _promptOptions.MutedColour
+                                isActive
+                                    ? _promptOptions.Theme.SelectOptionTextActive
+                                    : _promptOptions.Theme.SelectOptionTextInactive
                             );
                         if (!string.IsNullOrWhiteSpace(option.Hint) && isActive && !_optionsInline)
                             display = string.Format(
                                 "{0} {1}",
                                 display,
-                                option.Hint.Pastel(_promptOptions.MutedColour)
+                                option.Hint.Pastel(_promptOptions.Theme.SelectOptionHint)
                             );
 
                         if (!_optionsInline)
