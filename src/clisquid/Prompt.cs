@@ -25,17 +25,15 @@ namespace CliSquid
         internal const string CHECK_INACTIVE = "\u25FB"; // ◻
         internal const string CHECK_SELECTED = "\u25FC"; // ◼
 
-        internal static CancellationTokenSource TokenSource;
+        internal static CancellationTokenSource TokenSource = new CancellationTokenSource();
         internal static CancellationToken Token;
         private static TextWriter output = Console.Out;
-        private static Configuration configuration;
+        private static Configuration configuration = new Configuration();
 
         public static void Configure()
         {
-            TokenSource = new CancellationTokenSource();
             Token = TokenSource.Token;
 
-            configuration = new Configuration();
             Console.Clear();
             output = Console.Out;
             Console.SetOut(new PrefixWriter());
