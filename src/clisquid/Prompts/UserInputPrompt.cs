@@ -99,6 +99,7 @@ namespace CliSquid.Prompts
                 Console.TreatControlCAsInput = false;
                 pos = CursorPosition.GetCursorPosition();
 
+                var validCharacter = false;
                 switch (cki.Key)
                 {
                     case ConsoleKey.Delete:
@@ -128,17 +129,23 @@ namespace CliSquid.Prompts
                     case ConsoleKey.C:
                         if ((cki.Modifiers & ConsoleModifiers.Control) != 0)
                             Prompt.CancelToken();
-
+                        else
+                            validCharacter = true;
                         break;
                     default:
-                        var ins = pos.Left - Prompt.GUTTER_PAD_RIGHT;
-                        if (ins >= 0 && sb.Length > ins)
-                            sb.Insert(ins, cki.KeyChar);
-                        else
-                            sb.Append(new char[] { cki.KeyChar });
-
-                        pos.Left++;
+                        validCharacter = true;
                         break;
+                }
+
+                if (validCharacter)
+                {
+                    var ins = pos.Left - Prompt.GUTTER_PAD_RIGHT;
+                    if (ins >= 0 && sb.Length > ins)
+                        sb.Insert(ins, cki.KeyChar);
+                    else
+                        sb.Append(new char[] { cki.KeyChar });
+
+                    pos.Left++;
                 }
 
                 if (Prompt.Token.IsCancellationRequested)
