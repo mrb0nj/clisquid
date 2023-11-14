@@ -88,13 +88,15 @@ namespace CliSquid.Prompts
             Console.SetCursorPosition(Prompt.GUTTER_PAD_RIGHT, pos.Top - 2);
 
             var sb = new StringBuilder();
-            ConsoleKeyInfo cki;
+            ConsoleKeyInfo cki = default;
             var valid = Tuple.Create(true, string.Empty);
 
             do
             {
                 var currentInput = sb.ToString();
+                Console.TreatControlCAsInput = true;
                 cki = Console.ReadKey(true);
+                Console.TreatControlCAsInput = false;
                 pos = CursorPosition.GetCursorPosition();
 
                 switch (cki.Key)
@@ -123,6 +125,11 @@ namespace CliSquid.Prompts
                     case ConsoleKey.Enter:
                         // ignore this key
                         break;
+                    case ConsoleKey.C:
+                        if ((cki.Modifiers & ConsoleModifiers.Control) != 0)
+                            Prompt.CancelToken();
+
+                        break;
                     default:
                         var ins = pos.Left - Prompt.GUTTER_PAD_RIGHT;
                         if (ins >= 0 && sb.Length > ins)
@@ -132,6 +139,12 @@ namespace CliSquid.Prompts
 
                         pos.Left++;
                         break;
+                }
+
+                if (Prompt.Token.IsCancellationRequested)
+                {
+                    Console.SetCursorPosition(0, pos.Top - 1);
+                    Prompt.ExitGracefully(_title);
                 }
 
                 var newInput = sb.ToString();

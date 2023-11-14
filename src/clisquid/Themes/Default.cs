@@ -6,6 +6,7 @@ namespace CliSquid.Themes
     public class DefaultTheme : IPromptTheme
     {
         public Color Background => throw new System.NotImplementedException();
+        public Color ErrorForeground => Color.Crimson;
         public Color IntroForeground => Color.Black;
         public Color IntroBackground => Color.DodgerBlue;
         public Color CompleteForeground => Color.GreenYellow;

@@ -3,6 +3,7 @@ namespace CliSquid.Prompts
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Threading.Tasks;
     using CliSquid.Enums;
     using CliSquid.Interfaces;
     using Pastel;
@@ -172,11 +173,13 @@ namespace CliSquid.Prompts
             render(_title, _options, selectedItems, activeItem, PromptStatus.Active);
 
             Console.Out.Flush();
-            ConsoleKeyInfo cki;
+            ConsoleKeyInfo cki = default;
 
             do
             {
+                Console.TreatControlCAsInput = true;
                 cki = Console.ReadKey(true);
+                Console.TreatControlCAsInput = false;
                 var idx = _options.IndexOf(activeItem);
                 switch (cki.Key)
                 {
@@ -218,6 +221,20 @@ namespace CliSquid.Prompts
                         else
                             selectedItems.Add(activeItem);
                         break;
+                    case ConsoleKey.C:
+                        if ((cki.Modifiers & ConsoleModifiers.Control) != 0)
+                            Prompt.CancelToken();
+
+                        break;
+                }
+
+                if (Prompt.Token.IsCancellationRequested)
+                {
+                    var pos = CursorPosition.GetCursorPosition();
+                    var topOffset = _optionsInline ? 3 : _options.Count + 2;
+                    Console.SetCursorPosition(0, pos.Top - topOffset);
+                    Console.CursorVisible = true;
+                    Prompt.ExitGracefully(_title);
                 }
 
                 reRender(_title, _options, selectedItems, activeItem, PromptStatus.Active);
@@ -351,11 +368,13 @@ namespace CliSquid.Prompts
 
             Console.Out.Flush();
 
-            ConsoleKeyInfo cki;
+            ConsoleKeyInfo cki = default;
 
             do
             {
+                Console.TreatControlCAsInput = true;
                 cki = Console.ReadKey(true);
+                Console.TreatControlCAsInput = false;
                 var idx = _options.IndexOf(activeItem);
                 switch (cki.Key)
                 {
@@ -395,13 +414,35 @@ namespace CliSquid.Prompts
                     case ConsoleKey.Enter:
                         selectedItem = activeItem;
                         break;
+                    case ConsoleKey.C:
+                        if ((cki.Modifiers & ConsoleModifiers.Control) != 0)
+                            Prompt.CancelToken();
+
+                        break;
+                }
+
+                if (Prompt.Token.IsCancellationRequested)
+                {
+                    var pos = CursorPosition.GetCursorPosition();
+                    var topOffset = _optionsInline ? 3 : _options.Count + 2;
+                    Console.SetCursorPosition(0, pos.Top - topOffset);
+                    Console.CursorVisible = true;
+                    Prompt.ExitGracefully(_title);
                 }
 
                 reRender(_title, _options, selectedItem, activeItem, PromptStatus.Active);
             } while (cki.Key != ConsoleKey.Enter || selectedItem == null);
 
-            reRender(_title, _options, selectedItem, null, PromptStatus.Complete);
             Console.CursorVisible = true;
+            if (Prompt.Token.IsCancellationRequested)
+            {
+                var pos = CursorPosition.GetCursorPosition();
+                var topOffset = _optionsInline ? 3 : _options.Count + 2;
+                Console.SetCursorPosition(0, pos.Top - topOffset);
+                Prompt.ExitGracefully(_title);
+            }
+
+            reRender(_title, _options, selectedItem, null, PromptStatus.Complete);
 
             return selectedItem.Value;
         }

@@ -44,7 +44,7 @@ namespace CliSquid.Prompts
 
             var c = 0;
             var pos = CursorPosition.GetCursorPosition();
-            while (!t.IsCompleted)
+            while (!t.IsCompleted && !Prompt.Token.IsCancellationRequested)
             {
                 Console.SetCursorPosition(0, pos.Top);
                 Prompt.WriteGutter(sp[c].Pastel(_promptOptions.Theme.Spinner));
@@ -60,6 +60,13 @@ namespace CliSquid.Prompts
                 c = c >= sp.Length - 1 ? 0 : c + 1;
             }
 
+            Console.CursorVisible = true;
+            if (Prompt.Token.IsCancellationRequested)
+            {
+                Console.SetCursorPosition(0, pos.Top);
+                Prompt.ExitGracefully(_title);
+            }
+
             var result = t.Result;
             var resultText = result != null ? result.ToString() : "Complete";
 
@@ -71,8 +78,6 @@ namespace CliSquid.Prompts
             Prompt.WriteGutter(Prompt.GetGutterBar(PromptStatus.Complete));
             Prompt.WriteText(resultText.Pastel(_promptOptions.Theme.SpinnerResultForeground));
             Prompt.WriteGutter(Prompt.GetGutterBar(PromptStatus.Complete), newLine: true);
-
-            Console.CursorVisible = true;
             return result;
         }
 

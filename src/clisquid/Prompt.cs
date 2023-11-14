@@ -3,6 +3,7 @@ namespace CliSquid
     using System;
     using System.Collections.Generic;
     using System.IO;
+    using System.Threading;
     using CliSquid.Enums;
     using CliSquid.Interfaces;
     using CliSquid.Prompts;
@@ -24,15 +25,26 @@ namespace CliSquid
         internal const string CHECK_INACTIVE = "\u25FB"; // ◻
         internal const string CHECK_SELECTED = "\u25FC"; // ◼
 
+        internal static CancellationTokenSource TokenSource;
+        internal static CancellationToken Token;
         private static TextWriter output = Console.Out;
         private static Configuration configuration;
 
         public static void Configure()
         {
+            TokenSource = new CancellationTokenSource();
+            Token = TokenSource.Token;
+
             configuration = new Configuration();
             Console.Clear();
             output = Console.Out;
             Console.SetOut(new PrefixWriter());
+            Console.TreatControlCAsInput = false;
+            Console.CancelKeyPress += delegate(object sender, ConsoleCancelEventArgs args)
+            {
+                args.Cancel = true;
+                TokenSource.Cancel();
+            };
         }
 
         public static void Configure(Action<Configuration> configure)
@@ -77,6 +89,39 @@ namespace CliSquid
                 new PromptOption<bool>(false) { Display = "No" }
             };
             return FromList<bool>().Title(text).Inline().Options(options).SelectOne();
+        }
+
+        internal static void CancelToken() => TokenSource.Cancel();
+
+        internal static void ExitGracefully(string title)
+        {
+            var abortedText = "Aborted...";
+            var interruptedText = "Program execution interrupted";
+            WriteGutter(Prompt.GetGutterPrompt(PromptStatus.Error));
+            WriteText(title.PadRight(Console.WindowWidth - title.Length - Prompt.GUTTER_PAD_RIGHT));
+            WriteGutter(Prompt.GetGutterBar(PromptStatus.Error));
+            WriteText(
+                abortedText.PadRight(Console.WindowWidth - abortedText.Length - GUTTER_PAD_RIGHT)
+            );
+            WriteGutter(
+                Prompt
+                    .GetGutterBar(PromptStatus.Error)
+                    .PadRight(Console.WindowWidth - GUTTER_PAD_RIGHT),
+                newLine: true
+            );
+            WriteGutter(Prompt.GetGutterEnd(PromptStatus.Error));
+            WriteText(
+                interruptedText
+                    .PadRight(Console.WindowWidth - interruptedText.Length - GUTTER_PAD_RIGHT)
+                    .Pastel(configuration.Theme.ErrorForeground)
+            );
+
+            var pos = CursorPosition.GetCursorPosition();
+            var lines = Console.BufferHeight - pos.Top - 1;
+            for (var i = 0; i < lines; i++)
+                output.WriteLine("".PadRight(Console.WindowWidth));
+            Console.SetCursorPosition(pos.Left, pos.Top);
+            Environment.Exit(-1);
         }
 
         internal static void WriteGutter(string gutter, bool newLine = false)

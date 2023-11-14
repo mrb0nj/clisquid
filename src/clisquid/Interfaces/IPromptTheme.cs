@@ -4,7 +4,7 @@ namespace CliSquid.Interfaces
 
     public interface IPromptTheme
     {
-        public Color Background { get; }
+        // Intro Prompt
         public Color IntroForeground { get; }
         public Color IntroBackground { get; }
 
@@ -53,5 +53,9 @@ namespace CliSquid.Interfaces
         public Color UserInputResultBackground { get; }
         public Color UserInputPlaceholderForeground { get; }
         public Color UserInputPlaceholderBackground { get; }
+
+        // Generic
+        public Color Background { get; }
+        public Color ErrorForeground { get; }
     }
 }

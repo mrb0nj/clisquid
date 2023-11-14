@@ -6,6 +6,7 @@ namespace CliSquid.Themes
     public class DraculaTheme : IPromptTheme
     {
         public Color Background => throw new System.NotImplementedException();
+        public Color ErrorForeground => throw new System.NotImplementedException();
         public Color IntroForeground => throw new System.NotImplementedException();
         public Color IntroBackground => throw new System.NotImplementedException();
         public Color CompleteForeground => throw new System.NotImplementedException();
