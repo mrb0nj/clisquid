@@ -6,6 +6,8 @@ namespace CliSquid
     using System.IO;
     using System.Linq;
     using System.Text;
+    using System.Threading;
+    using System.Threading.Tasks;
     using Pastel;
 
     public static class Prompt
@@ -36,6 +38,8 @@ namespace CliSquid
         public static IUserInputPrompt<T> FromUserInput<T>() => new Prompt<T>();
 
         public static ISelectPrompt<T> FromList<T>() => new Prompt<T>();
+
+        public static ISpinner<T> Spinner<T>() => new Prompt<T>();
 
         public static void Intro(string text)
         {
@@ -166,10 +170,12 @@ namespace CliSquid
         }
     }
 
-    public class Prompt<T> : IUserInputPrompt<T>, ISelectPrompt<T>
+    public class Prompt<T> : IUserInputPrompt<T>, ISelectPrompt<T>, ISpinner<T>
     {
         private string _text = "";
         private string _placeholder = "";
+        private string _status = "";
+        private SpinnerType _spinnerType = SpinnerType.Dots;
         private IList<PromptOption<T>>? _options;
         private bool _optionsInline;
         private int _limit;
@@ -698,21 +704,99 @@ namespace CliSquid
             return this;
         }
 
+        ISpinner<T> ISpinner<T>.Title(string title)
+        {
+            _text = title;
+            return this;
+        }
+
+        public T Spin(Func<ISpinner<T>, T> func)
+        {
+            Console.CursorVisible = false;
+            var t = Task.Run(() => func(this));
+            var sp = GetSpinner(_spinnerType);
+            var st = sp.Length == 0 ? 1000 : 1000 / sp.Length;
+
+            var c = 0;
+            var pos = CursorPosition.GetCursorPosition();
+            while (!t.IsCompleted)
+            {
+                Console.SetCursorPosition(0, pos.Top);
+                Prompt.WriteGutter(sp[c].Pastel(Color.DodgerBlue));
+                Prompt.WriteText(_text);
+                Prompt.WriteGutter(Prompt.GetGutterBar(PromptStatus.Active));
+                Prompt.WriteText(
+                    _status
+                        .PadRight(Console.WindowWidth - _status.Length - Prompt.GUTTER_PAD_RIGHT)
+                        .Pastel(Color.DimGray)
+                );
+                Prompt.WriteGutter(Prompt.GetGutterEnd(PromptStatus.Active));
+                Thread.Sleep(st);
+                c = c >= sp.Length - 1 ? 0 : c + 1;
+            }
+
+            var result = t.Result;
+            var resultText = result != null ? result.ToString() : "Complete";
+
+            Console.SetCursorPosition(0, pos.Top);
+            Prompt.WriteGutter(Prompt.GetGutterPrompt(PromptStatus.Complete));
+            Prompt.WriteText(
+                _text.PadRight(Console.WindowWidth - _text.Length - Prompt.GUTTER_PAD_RIGHT)
+            );
+            Prompt.WriteGutter(Prompt.GetGutterBar(PromptStatus.Complete));
+            Prompt.WriteText(resultText.Pastel(Color.DimGray));
+            Prompt.WriteGutter(Prompt.GetGutterBar(PromptStatus.Complete), newLine: true);
+
+            Console.CursorVisible = true;
+            return result;
+        }
+
+        public void SetStatus(string status)
+        {
+            _status = status;
+        }
+
+        public ISpinner<T> SetSpinnerType(SpinnerType spinnerType)
+        {
+            _spinnerType = spinnerType;
+            return this;
+        }
+
         public IUserInputPrompt<T> Validate(Func<string, Tuple<bool, string>> validator)
         {
             _validator = validator;
             return this;
         }
+
+        private string[] GetSpinner(SpinnerType spinnerType)
+        {
+            switch (spinnerType)
+            {
+                case SpinnerType.Dots:
+                    return new string[] { "⣾", "⣽", "⣻", "⢿", "⡿", "⣟", "⣯", "⣷" };
+                case SpinnerType.Line:
+                    return new string[] { "|", "/", "-", "\\" };
+                case SpinnerType.Jump:
+                    return new string[] { "⢄", "⢂", "⢁", "⡁", "⡈", "⡐", "⡠" };
+                case SpinnerType.Pulse:
+                    return new string[] { "█", "▓", "▒", "░" };
+                case SpinnerType.MiniDots:
+                    return new string[] { "⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏" };
+                case SpinnerType.Hamburger:
+                    return new string[] { "☱", "☲", "☴", "☲" };
+            }
+
+            return new string[0];
+        }
     }
 
-    internal class CursorPosition
+    public enum SpinnerType
     {
-        public int Top { get; set; }
-        public int Left { get; set; }
-
-        public static CursorPosition GetCursorPosition()
-        {
-            return new CursorPosition { Top = Console.CursorTop, Left = Console.CursorLeft };
-        }
+        Dots,
+        Line,
+        MiniDots,
+        Jump,
+        Pulse,
+        Hamburger
     }
 }
