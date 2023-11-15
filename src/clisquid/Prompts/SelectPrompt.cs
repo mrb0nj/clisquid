@@ -3,7 +3,6 @@ namespace CliSquid.Prompts
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Threading.Tasks;
     using CliSquid.Enums;
     using CliSquid.Interfaces;
     using Pastel;
@@ -14,16 +13,16 @@ namespace CliSquid.Prompts
         private IList<PromptOption<T>>? _options;
         private bool _optionsInline;
         private int _limit;
-        private Configuration _promptOptions;
+        private Configuration _configuration;
 
         public SelectPrompt()
         {
-            _promptOptions = new Configuration();
+            _configuration = new Configuration();
         }
 
-        public SelectPrompt(Configuration promptOptions)
+        public SelectPrompt(Configuration configuration)
         {
-            _promptOptions = promptOptions;
+            _configuration = configuration;
         }
 
         public ISelectPrompt<T> Inline()
@@ -65,7 +64,7 @@ namespace CliSquid.Prompts
             {
                 Console.CursorVisible = false;
                 Prompt.WriteGutter(Prompt.GetGutterPrompt(status));
-                Prompt.WriteText(prompt.Pastel(_promptOptions.Theme.SelectForeground));
+                Prompt.WriteText(prompt.Pastel(_configuration.Theme.SelectForeground));
 
                 if (status == PromptStatus.Complete)
                 {
@@ -77,7 +76,7 @@ namespace CliSquid.Prompts
                     var display = selectedOptions.PadRight(
                         Console.WindowWidth - selectedOptions.Length - Prompt.GUTTER_PAD_RIGHT
                     );
-                    Prompt.WriteText(display.Pastel(_promptOptions.Theme.SelectResultForeground));
+                    Prompt.WriteText(display.Pastel(_configuration.Theme.SelectResultForeground));
                     for (var i = 0; i < options.Count; i++)
                         Prompt.WriteText("".PadRight(Console.WindowWidth));
                     var pos = CursorPosition.GetCursorPosition();
@@ -97,27 +96,27 @@ namespace CliSquid.Prompts
                         var marker = isSelected
                             ? Prompt
                                 .CHECK_SELECTED
-                                .Pastel(_promptOptions.Theme.SelectOptionSelected)
+                                .Pastel(_configuration.Theme.SelectOptionSelected)
                             : Prompt
                                 .CHECK_INACTIVE
                                 .Pastel(
                                     isActive
-                                        ? _promptOptions.Theme.SelectOptionActive
-                                        : _promptOptions.Theme.SelectOptionInactive
+                                        ? _configuration.Theme.SelectOptionActive
+                                        : _configuration.Theme.SelectOptionInactive
                                 );
 
                         var display = option
                             .Display
                             .Pastel(
                                 isActive
-                                    ? _promptOptions.Theme.SelectOptionTextActive
-                                    : _promptOptions.Theme.SelectOptionTextInactive
+                                    ? _configuration.Theme.SelectOptionTextActive
+                                    : _configuration.Theme.SelectOptionTextInactive
                             );
                         if (!string.IsNullOrWhiteSpace(option.Hint) && isActive && !_optionsInline)
                             display = string.Format(
                                 "{0} {1}",
                                 display,
-                                option.Hint.Pastel(_promptOptions.Theme.SelectOptionHint)
+                                option.Hint.Pastel(_configuration.Theme.SelectOptionHint)
                             );
 
                         if (!_optionsInline)
@@ -269,7 +268,7 @@ namespace CliSquid.Prompts
             {
                 Console.CursorVisible = false;
                 Prompt.WriteGutter(Prompt.GetGutterPrompt(status));
-                Prompt.WriteText(prompt.Pastel(_promptOptions.Theme.SelectForeground));
+                Prompt.WriteText(prompt.Pastel(_configuration.Theme.SelectForeground));
 
                 if (status == PromptStatus.Complete)
                 {
@@ -284,7 +283,7 @@ namespace CliSquid.Prompts
                                     - Prompt.GUTTER_PAD_RIGHT
                             );
                         Prompt.WriteText(
-                            display.Pastel(_promptOptions.Theme.SelectResultForeground)
+                            display.Pastel(_configuration.Theme.SelectResultForeground)
                         );
                     }
                 }
@@ -303,21 +302,21 @@ namespace CliSquid.Prompts
                             isActive ? Prompt.RADIO_ACTIVE : Prompt.RADIO_INACTIVE
                         ).Pastel(
                             isActive
-                                ? _promptOptions.Theme.SelectOptionActive
-                                : _promptOptions.Theme.SelectOptionInactive
+                                ? _configuration.Theme.SelectOptionActive
+                                : _configuration.Theme.SelectOptionInactive
                         );
                         var display = option
                             .Display
                             .Pastel(
                                 isActive
-                                    ? _promptOptions.Theme.SelectOptionTextActive
-                                    : _promptOptions.Theme.SelectOptionTextInactive
+                                    ? _configuration.Theme.SelectOptionTextActive
+                                    : _configuration.Theme.SelectOptionTextInactive
                             );
                         if (!string.IsNullOrWhiteSpace(option.Hint) && isActive && !_optionsInline)
                             display = string.Format(
                                 "{0} {1}",
                                 display,
-                                option.Hint.Pastel(_promptOptions.Theme.SelectOptionHint)
+                                option.Hint.Pastel(_configuration.Theme.SelectOptionHint)
                             );
 
                         if (!_optionsInline)

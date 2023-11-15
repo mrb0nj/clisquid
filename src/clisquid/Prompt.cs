@@ -3,6 +3,7 @@ namespace CliSquid
     using System;
     using System.Collections.Generic;
     using System.IO;
+    using System.Linq;
     using System.Threading;
     using CliSquid.Enums;
     using CliSquid.Interfaces;
@@ -55,6 +56,19 @@ namespace CliSquid
             new UserInputPrompt<T>(configuration);
 
         public static ISelectPrompt<T> FromList<T>() => new SelectPrompt<T>(configuration);
+
+        public static ISelectPrompt<T> FromEnum<T>()
+            where T : Enum
+        {
+            var prompt = new SelectPrompt<T>(configuration);
+
+            var enumOptions = Enum.GetValues(typeof(T))
+                .Cast<T>()
+                .Select(e => new PromptOption<T>(e) { Display = Enum.GetName(typeof(T), e) })
+                .ToList();
+            prompt.Options(enumOptions);
+            return prompt;
+        }
 
         public static ISpinner<T> Spinner<T>() => new SpinnerPrompt<T>(configuration);
 
