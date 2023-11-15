@@ -1,7 +1,6 @@
 namespace CliSquid.Prompts
 {
     using System;
-    using System.Threading;
     using System.Threading.Tasks;
     using CliSquid.Enums;
     using CliSquid.Interfaces;
@@ -44,6 +43,18 @@ namespace CliSquid.Prompts
 
             var c = 0;
             var pos = CursorPosition.GetCursorPosition();
+
+            // HACK: strange scroll behaviour of the spinner causes the
+            // buffer to scroll, so we write out enough space to render it
+            // and then offset the top by -3.
+            if (Console.CursorTop + 3 >= Console.WindowHeight)
+            {
+                pos.Top -= 3;
+                Prompt.WriteText(string.Empty);
+                Prompt.WriteText(string.Empty);
+                Prompt.WriteText(string.Empty);
+            }
+
             while (!t.IsCompleted && !Prompt.Token.IsCancellationRequested)
             {
                 Console.SetCursorPosition(0, pos.Top);
@@ -56,7 +67,7 @@ namespace CliSquid.Prompts
                         .Pastel(_promptOptions.Theme.SpinnerStatusForeground)
                 );
                 Prompt.WriteGutter(Prompt.GetGutterEnd(PromptStatus.Active));
-                Thread.Sleep(st);
+                t.Wait(st);
                 c = c >= sp.Length - 1 ? 0 : c + 1;
             }
 
