@@ -41,6 +41,7 @@ Prompt.Configure(options =>
 Prompt.Intro("my-app-name");
 
 ```
+![intro-demo](./images/intro.png)
 
 ##### UserInput - capture text input from the user
 
@@ -84,6 +85,8 @@ Input validtation returns a Tuple<bool, string> to represent the valid status an
 
 ##### Select list
 
+Lists can be navigated using the arrow keys or vim movement keys h/j/k/l
+
 From Enum:
 ```csharp
 
@@ -101,6 +104,8 @@ var status = Prompt
 		.SelectOne();
 ```
 
+![list-from-enum](./images/listfromenum.png)
+
 Single value from custom list:
 ```csharp
 
@@ -111,6 +116,8 @@ var options = new List<PromptOption<string>>()
 };
 var greeting = Prompt.FromList<string>().Title("Select one").Options(options).SelectOne();
 ```
+
+![list-from-custom](./images/listfromcustom.png)
 
 Multiple values from custom list:
 ```csharp
@@ -128,6 +135,8 @@ var selectedTech = Prompt
     .SelectMany();
 ```
 
+![list-multi-select](./images/listmultiselect.png)
+
 or optionally as an inline list:
 ```csharp
 var selectedTech = Prompt
@@ -137,6 +146,8 @@ var selectedTech = Prompt
     .Options(techOptions)
     .SelectMany();
 ```
+
+![list-multi-select-inline](./images/listmultiselectinline.png)
 
 ##### Spinner
 
@@ -159,6 +170,9 @@ var result = Prompt
         return "Finished doing something time consuming...";
     });
 ```
+
+![list-spinner-active](./images/spinneractive.png)
+![list-spinner-complete](./images/spinnercomplete.png)
 
 ##### Confirm returns true/false
 
