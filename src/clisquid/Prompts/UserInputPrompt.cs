@@ -100,6 +100,7 @@ namespace CliSquid.Prompts
                 pos = CursorPosition.GetCursorPosition();
 
                 var validCharacter = false;
+                var forceValidation = false;
                 switch (cki.Key)
                 {
                     case ConsoleKey.Delete:
@@ -126,6 +127,9 @@ namespace CliSquid.Prompts
                     case ConsoleKey.Escape:
                         Prompt.CancelToken();
                         break;
+                    case ConsoleKey.Enter:
+                        forceValidation = true;
+                        break; // ignore this as an input character
                     case ConsoleKey.C:
                         if ((cki.Modifiers & ConsoleModifiers.Control) != 0)
                             Prompt.CancelToken();
@@ -135,6 +139,12 @@ namespace CliSquid.Prompts
                     default:
                         validCharacter = true;
                         break;
+                }
+
+                if (Prompt.Token.IsCancellationRequested)
+                {
+                    Console.SetCursorPosition(0, pos.Top - 1);
+                    Prompt.ExitGracefully(_title);
                 }
 
                 if (validCharacter)
@@ -148,19 +158,8 @@ namespace CliSquid.Prompts
                     pos.Left++;
                 }
 
-                if (Prompt.Token.IsCancellationRequested)
-                {
-                    Console.SetCursorPosition(0, pos.Top - 1);
-                    Prompt.ExitGracefully(_title);
-                }
-
                 var newInput = sb.ToString();
-                var padLength =
-                    currentInput.Length > _placeholder.Length
-                        ? currentInput.Length
-                        : _placeholder.Length;
-
-                if (_validator != null && !string.IsNullOrWhiteSpace(newInput))
+                if (_validator != null)
                     valid = _validator(newInput);
                 else
                     valid = Tuple.Create(_validator == null, string.Empty);
@@ -168,11 +167,14 @@ namespace CliSquid.Prompts
                 var r = string.IsNullOrWhiteSpace(newInput)
                     ? _placeholder.Pastel(_promptOptions.Theme.UserInputPlaceholderForeground)
                     : newInput;
+
+                var isActive =
+                    valid.Item1 || (string.IsNullOrWhiteSpace(newInput) && !forceValidation);
                 reRender(
                     _title,
-                    r.PadRight(padLength),
-                    valid.Item1 ? PromptStatus.Active : PromptStatus.Warning,
-                    valid.Item2
+                    r.PadRight(Console.WindowWidth - r.Length - Prompt.GUTTER_PAD_RIGHT),
+                    isActive ? PromptStatus.Active : PromptStatus.Warning,
+                    !isActive ? valid.Item2 : string.Empty
                 );
 
                 Console.SetCursorPosition(pos.Left, pos.Top);
