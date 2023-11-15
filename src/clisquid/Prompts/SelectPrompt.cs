@@ -224,7 +224,9 @@ namespace CliSquid.Prompts
                     case ConsoleKey.C:
                         if ((cki.Modifiers & ConsoleModifiers.Control) != 0)
                             Prompt.CancelToken();
-
+                        break;
+                    case ConsoleKey.Escape:
+                        Prompt.CancelToken();
                         break;
                 }
 
@@ -417,7 +419,9 @@ namespace CliSquid.Prompts
                     case ConsoleKey.C:
                         if ((cki.Modifiers & ConsoleModifiers.Control) != 0)
                             Prompt.CancelToken();
-
+                        break;
+                    case ConsoleKey.Escape:
+                        Prompt.CancelToken();
                         break;
                 }
 

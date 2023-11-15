@@ -123,8 +123,8 @@ namespace CliSquid.Prompts
                         if (pos.Left > Prompt.GUTTER_PAD_RIGHT)
                             pos.Left--;
                         break;
-                    case ConsoleKey.Enter:
-                        // ignore this key
+                    case ConsoleKey.Escape:
+                        Prompt.CancelToken();
                         break;
                     case ConsoleKey.C:
                         if ((cki.Modifiers & ConsoleModifiers.Control) != 0)
