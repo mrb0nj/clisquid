@@ -10,6 +10,7 @@ namespace CliSquid.Prompts
     {
         private string _title = "";
         private string _placeholder = "";
+        private string _initialValue = "";
         private Func<string, Tuple<bool, string>>? _validator;
         private Configuration _promptOptions;
 
@@ -25,7 +26,8 @@ namespace CliSquid.Prompts
 
         public IUserInputPrompt<T> InitialValue(string initialValue)
         {
-            throw new NotImplementedException();
+            _initialValue = initialValue;
+            return this;
         }
 
         public IUserInputPrompt<T> Placeholder(string placeholder)
@@ -76,18 +78,21 @@ namespace CliSquid.Prompts
                 render(prompt, response, status, warning);
             };
 
+            var sb = new StringBuilder(_initialValue);
+
             render(
                 _title,
-                _placeholder.Pastel(_promptOptions.Theme.UserInputPlaceholderForeground),
+                sb.Length > 0
+                    ? sb.ToString().Pastel(_promptOptions.Theme.UserInputActiveForeground)
+                    : _placeholder.Pastel(_promptOptions.Theme.UserInputPlaceholderForeground),
                 PromptStatus.Active,
                 string.Empty
             );
 
             Console.Out.Flush();
             var pos = CursorPosition.GetCursorPosition();
-            Console.SetCursorPosition(Prompt.GUTTER_PAD_RIGHT, pos.Top - 2);
+            Console.SetCursorPosition(Prompt.GUTTER_PAD_RIGHT + sb.Length, pos.Top - 2);
 
-            var sb = new StringBuilder();
             ConsoleKeyInfo cki = default;
             var valid = Tuple.Create(true, string.Empty);
 
