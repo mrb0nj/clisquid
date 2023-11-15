@@ -4,6 +4,7 @@ namespace CliSquid
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
+    using System.Text;
     using System.Threading;
     using CliSquid.Enums;
     using CliSquid.Interfaces;
@@ -35,6 +36,7 @@ namespace CliSquid
         {
             Token = TokenSource.Token;
 
+            Console.OutputEncoding = Encoding.UTF8;
             Console.Clear();
             output = Console.Out;
             Console.SetOut(new PrefixWriter());
