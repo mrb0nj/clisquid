@@ -34,6 +34,11 @@ namespace CliSquid
 
         public static void Configure()
         {
+            Configure(TokenSource);
+        }
+        public static void Configure(CancellationTokenSource tokenSource)
+        {
+            TokenSource = tokenSource;
             Token = TokenSource.Token;
 
             Console.OutputEncoding = Encoding.UTF8;
